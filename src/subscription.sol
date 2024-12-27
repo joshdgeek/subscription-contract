@@ -43,6 +43,19 @@ contract SubscriptionService {
         _;
     }
 
+    //Access checker
+    modifier checkExpiryStatus() {
+        //check if a user has subscribed in the past
+        require(getSubscribers[msg.sender] != 0, "not a valid subscriber");
+
+        //confirm the subscription status
+        require(
+            block.timestamp < getSubscribers[msg.sender].expiry_duration,
+            "your subscription has expired"
+        );
+        _;
+    }
+
     //admin only function to add subscription plans
     function addPlan(uint _subID, uint amount, uint duration) public onlyOwner {
         subPlans[_subID] = subscriptionDetails(amount, duration);
@@ -74,11 +87,7 @@ contract SubscriptionService {
             "payment failed"
         );
 
-        getSubscribers[msg.sender] = subscribers(
-            _subid,
-            time,
-            time + monthlyTimeStamp
-        );
+        getSubscribers[msg.sender] = subscribers(_subid, time, time + 30 days);
     }
 
     function unsuscribe(address user) public {
