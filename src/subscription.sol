@@ -1,15 +1,23 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.18;
 
+import {MockERC} from "./mockERC.sol";
+
 interface IERC20 {
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 }
 
 contract SubscriptionService {
     address owner_;
+    IERC20 tokenAddress;
 
-    constructor() {
+    constructor(address _mockERC) {
         owner_ = msg.sender;
+        tokenAddress = IERC20(_mockERC);
     }
 
     struct subscriptionDetails {
@@ -42,30 +50,53 @@ contract SubscriptionService {
     //Access checker
     modifier checkExpiryStatus() {
         //check if a user has subscribed in the past
-        require(getSubscribers[msg.sender].expiry_duration != 0, "not a valid subscriber");
+        require(
+            getSubscribers[msg.sender].expiry_duration != 0,
+            "not a valid subscriber"
+        );
 
         //confirm the subscription status
-        require(block.timestamp < getSubscribers[msg.sender].expiry_duration, "your subscription has expired");
+        require(
+            block.timestamp < getSubscribers[msg.sender].expiry_duration,
+            "your subscription has expired"
+        );
         _;
     }
 
     //admin only function to add subscription plans
-    function addPlan(uint256 _subID, uint256 amount, uint256 duration) public onlyOwner {
+    function addPlan(
+        uint256 _subID,
+        uint256 amount,
+        uint256 duration
+    ) public onlyOwner {
         subPlans[_subID] = subscriptionDetails(amount, duration);
     }
 
-    function getSubscriber(address userID) public view returns (uint256, uint256, uint256) {
+    function getSubscriber(
+        address userID
+    ) public view returns (uint256, uint256, uint256) {
         subscribers memory getUser = getSubscribers[userID];
-        return (getUser.sub_Id, getUser.timeStampofSubscription, getUser.expiry_duration);
+        return (
+            getUser.sub_Id,
+            getUser.timeStampofSubscription,
+            getUser.expiry_duration
+        );
     }
 
     //function to subscribe
-    function subscribe(uint256 _subid, address tokenAddress) public {
+    function subscribe(uint256 _subid) public {
         //set time stamp for the function
         uint256 time = block.timestamp;
         subscriptionDetails memory plan = subPlans[_subid];
         require(plan.amount > 0, "not enough to cover subscription");
-        require(IERC20(tokenAddress).transferFrom(msg.sender, address(this), plan.amount), "payment failed");
+        require(
+            IERC20(tokenAddress).transferFrom(
+                msg.sender,
+                address(this),
+                plan.amount
+            ),
+            "payment failed"
+        );
 
         getSubscribers[msg.sender] = subscribers(_subid, time, time + 30 days);
     }
