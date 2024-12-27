@@ -46,7 +46,10 @@ contract SubscriptionService {
     //Access checker
     modifier checkExpiryStatus() {
         //check if a user has subscribed in the past
-        require(getSubscribers[msg.sender] != 0, "not a valid subscriber");
+        require(
+            getSubscribers[msg.sender].expiry_duration != 0,
+            "not a valid subscriber"
+        );
 
         //confirm the subscription status
         require(

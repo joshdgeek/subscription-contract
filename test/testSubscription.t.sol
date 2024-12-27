@@ -59,11 +59,7 @@ contract TestScript is Test {
     function testUnSubscription() public {
         //testgetSubscribers();
         subscriptionService.unsuscribe(dummySubscriber);
-        (
-            uint sub_Id,
-            uint timeStampofSubscription,
-            uint expiry_duration
-        ) = subscriptionService.getSubscriber(dummySubscriber);
+        (uint sub_Id, , ) = subscriptionService.getSubscriber(dummySubscriber);
         assertEq(sub_Id, 0, "user has active subscriptiion");
     }
 
