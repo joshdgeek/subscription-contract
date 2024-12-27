@@ -24,7 +24,7 @@ contract TestScript is Test {
     function testaddSubPlans() public {
         vm.prank(admin);
         subscriptionService.addPlan(1, 20, 2592000);
-        (uint amount, uint duration) = subscriptionService.subPlans(1);
+        (uint256 amount, uint256 duration) = subscriptionService.subPlans(1);
 
         emit log_named_uint("Plan Amount", amount);
         emit log_named_uint("Plan Duration", duration);
@@ -39,27 +39,20 @@ contract TestScript is Test {
         vm.prank(dummySubscriber);
         vm.deal(dummySubscriber, 200 ether);
         subscriptionService.subscribe(1, mockERC);
-        (
-            uint sub_id,
-            uint timeofSubscription,
-            uint expiry_duration
-        ) = subscriptionService.getSubscribers(dummySubscriber);
+        (uint256 sub_id, uint256 timeofSubscription, uint256 expiry_duration) =
+            subscriptionService.getSubscribers(dummySubscriber);
 
         emit log_named_uint("sub date", timeofSubscription);
         emit log_named_uint("expiry date", expiry_duration);
 
         assertEq(sub_id, 1, "id not accurate");
-        assertEq(
-            expiry_duration,
-            timeofSubscription + 2592000,
-            "duration mismatch"
-        );
+        assertEq(expiry_duration, timeofSubscription + 2592000, "duration mismatch");
     }
 
     function testUnSubscription() public {
         //testgetSubscribers();
         subscriptionService.unsuscribe(dummySubscriber);
-        (uint sub_Id, , ) = subscriptionService.getSubscriber(dummySubscriber);
+        (uint256 sub_Id,,) = subscriptionService.getSubscriber(dummySubscriber);
         assertEq(sub_Id, 0, "user has active subscriptiion");
     }
 
